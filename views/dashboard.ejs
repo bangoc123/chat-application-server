@@ -1,0 +1,19 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="Semantic-UI-CSS-master/semantic.min.css">
+    </head>
+    <body>
+        <h1>Hi, <%= username %></h1>
+        <table  class="ui celled table">
+            <% for(var i=0; i < contacts.length; i++) { %>
+            <tr>
+                <td><%= contacts[i].username %></td>
+                <td><%= contacts[i].email %></td>
+            </tr>
+            <% } %>
+        </table>
+        <%if (username === 'donald_trump') { %>
+            <button class="ui primary button">Launch Rocket</button>
+        <% } %>
+    </body>
+</html>
