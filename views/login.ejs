@@ -11,31 +11,27 @@
 
 <body>
   <div class="margin-top-200">
-    <div class="ui middle aligned stackable grid container">
-      <div class="row">
-        <div class="wide column">
-          <%if (error.length > 0) { %>
-            <div class="ui negative message">
-              <div class="header">
-                We're sorry...
-              </div>
-              <p>
-                <%= error %>
-              </p>
-            </div>
-            <% } %>
+      <div class="ui middle aligned stackable grid container">
+          <div class="row">
+            <div class="wide column">
+                <%if (error.length > 0) { %>
+                  <div class="ui negative message">
+                    <div class="header">
+                      We're sorry...
+                    </div>
+                    <p>
+                      <%= error %>
+                    </p>
+                  </div>
+                  <% } %>
               <div class="ui inverted segment grey">
                 <h1></h1>
                 <div class="ui inverted form">
-                  <form action="/signup" method="POST">
+                  <form action="/login" method="POST">
                     <div class="two fields">
                       <div class="field">
                         <label>Username</label>
                         <input placeholder="Username" type="text" name="username">
-                      </div>
-                      <div class="field">
-                        <label>Email</label>
-                        <input placeholder="Email" type="text" name="email">
                       </div>
                       <div class="field">
                         <label>Password</label>
@@ -46,9 +42,9 @@
                   </form>
                 </div>
               </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
   </div>
 </body>
 

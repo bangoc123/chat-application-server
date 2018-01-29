@@ -1,7 +1,10 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import session from 'express-session';
-import logger from 'morgan';
+import morgan from 'morgan';
+import mongoose from 'mongoose';
+import logger from 'winston';
+import flash from 'express-flash';
 
 import {
   usersController,
@@ -9,6 +12,7 @@ import {
   dashboardController,
   signupController,
   loginController,
+  roomsController,
 } from './controllers';
 
 const app = express();
@@ -30,11 +34,16 @@ app.use(express.static('public'));
 // Set up session
 app.use(session({
   secret: 'cmc nodejs training',
+  resave: true,
+  saveUninitialized: true,
 }));
+
+// Set up flash message
+app.use(flash());
 
 // Set up morgan for logging
 
-app.use(logger('combined'));
+app.use(morgan('dev'));
 
 /**
   Index Entry Point
@@ -49,6 +58,13 @@ app.use('/messages', messagesController);
 app.use('/dashboard', dashboardController);
 app.use('/signup', signupController);
 app.use('/login', loginController);
+app.use('/rooms', roomsController);
 
 const port = 8000;
-app.listen(port, () => { console.log(`Listening on ${port}`); });
+const mongoDBUri = 'mongodb://localhost/cmc';
+app.listen(port, () => {
+  logger.info(`Stated successfully server at port ${port}`);
+  mongoose.connect(mongoDBUri).then(() => {
+    logger.info('Conneted to mongoDB at port 27017');
+  });
+});
