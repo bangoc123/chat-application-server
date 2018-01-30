@@ -19,3 +19,16 @@ export const pagingDefault = {
 };
 
 export const underscoreId = '_id';
+
+export const config = {
+  passport: {
+    secret: 'cmc-awesome-developers',
+    expiresIn: 9007199254740991,
+  },
+  env: {
+    dev: {
+      port: 8000,
+      mongoDBUri: 'mongodb://localhost/cmc',
+    },
+  },
+};

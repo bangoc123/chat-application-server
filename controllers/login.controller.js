@@ -22,7 +22,7 @@ loginController.get('/', (req, res) => {
  * check user existence. If does not, redirect to /login and set flash error
  * hash req.body.password and compare to hashedPassword in DB
  * if equal, redirect to dashboard
- * if not, redirect to /login and set flash error
+ * other cases, redirect to /login
  */
 
 loginController.post('/', async (req, res) => {
@@ -32,8 +32,7 @@ loginController.post('/', async (req, res) => {
   } else {
     try {
       // check user existence
-      const user = await User.findOne({ username });
-      console.log('user', user);
+      const user = await User.findOne({ username }).lean().exec();
       if (!user) {
         req.flash('error', errors.UserDoesNotExist.message);
       } else if (user.hashedPassword !== generatehashedPassword(password)) {

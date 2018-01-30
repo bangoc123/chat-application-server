@@ -1,4 +1,5 @@
 import express from 'express';
+import passport from 'passport';
 // import User from './../db/User';
 import { Room, Message } from '../db/models';
 import { errors, pagingDefault, underscoreId } from './../global';
@@ -9,7 +10,7 @@ const roomsController = express.Router();
  * entry point: /rooms/:id
  * method: GET
  */
-roomsController.get('/:id', async (req, res) => {
+roomsController.get('/:id', passport.authenticate('jwt', { session: false }), async (req, res) => {
   const roomId = req.params.id;
   try {
     const room = await Room.findById(roomId).lean().exec();
@@ -36,7 +37,7 @@ roomsController.get('/:id', async (req, res) => {
  * method: GET
  */
 
-roomsController.get('/', async (req, res) => {
+roomsController.get('/', passport.authenticate('jwt', { session: false }), async (req, res) => {
   const { query } = req;
   const skip = query.skip || pagingDefault.skip;
   const limit = query.limit || pagingDefault.limit;

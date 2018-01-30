@@ -5,6 +5,9 @@ import morgan from 'morgan';
 import mongoose from 'mongoose';
 import logger from 'winston';
 import flash from 'express-flash';
+import passport from 'passport';
+import { applyPassportStrategy } from './passport';
+import { config } from './global';
 
 import {
   usersController,
@@ -13,6 +16,7 @@ import {
   signupController,
   loginController,
   roomsController,
+  identityController,
 } from './controllers';
 
 const app = express();
@@ -41,6 +45,14 @@ app.use(session({
 // Set up flash message
 app.use(flash());
 
+// Initialize passport to use
+
+app.use(passport.initialize());
+
+// Apply strategy to passport
+
+applyPassportStrategy(passport);
+
 // Set up morgan for logging
 
 app.use(morgan('dev'));
@@ -59,9 +71,9 @@ app.use('/dashboard', dashboardController);
 app.use('/signup', signupController);
 app.use('/login', loginController);
 app.use('/rooms', roomsController);
+app.use('/identity', identityController);
 
-const port = 8000;
-const mongoDBUri = 'mongodb://localhost/cmc';
+const { port, mongoDBUri } = config.env.dev;
 app.listen(port, () => {
   logger.info(`Stated successfully server at port ${port}`);
   mongoose.connect(mongoDBUri).then(() => {
