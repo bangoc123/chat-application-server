@@ -1,0 +1,125 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "CMC Leaderboards API",
+    "description": "Manage cmc chat app api.",
+    "version": "1.0.0"
+  },
+  "produces": [
+    "application/json"
+  ],
+  "host": "localhost:8000",
+  "basePath": "/",
+  "paths": {
+    "/users": {
+      "get": {
+        "summary": "",
+        "description": "Returns all users of this system",
+        "x-swagger-router-controller": "users",
+        "operationId": "getUsers",
+        "responses": {
+          "200": {
+            "description": "users response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "skip": {
+                  "type": "number"
+                },
+                "limit": {
+                  "type": "number"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/user"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rooms": {
+      "get": {
+        "summary": "",
+        "description": "Returns all rooms of this system",
+        "x-swagger-router-controller": "rooms",
+        "operationId": "getRooms",
+        "responses": {
+          "200": {
+            "description": "rooms response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "number"
+                },
+                "skip": {
+                  "type": "number"
+                },
+                "limit": {
+                  "type": "number"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/room"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "user": {
+      "type": "object",
+      "required": [
+        "_id",
+        "username",
+        "email"
+      ],
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
+      }
+    },
+    "room": {
+      "type": "object",
+      "required": [
+        "_id",
+        "name",
+        "members",
+        "__v"
+      ],
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "members": {
+          "type": "array",
+          "items": {  
+            "type": "string"
+          }
+        },
+        "__v": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

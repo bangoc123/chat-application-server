@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 import logger from 'winston';
 import flash from 'express-flash';
 import passport from 'passport';
+import swaggerTools from 'swagger-tools';
 import { applyPassportStrategy } from './passport';
 import { config } from './global';
 
@@ -18,6 +19,8 @@ import {
   roomsController,
   identityController,
 } from './controllers';
+
+const swaggerDoc = require('./swagger.json');
 
 const app = express();
 
@@ -62,6 +65,27 @@ app.use(morgan('dev'));
  */
 app.get('/', (req, res) => {
   res.render('index');
+});
+
+// Set up swagger
+
+const options = {
+  swaggerUi: '/swagger.json',
+  controllers: './controllers',
+};
+
+swaggerTools.initializeMiddleware(swaggerDoc, (middleware) => {
+  // Interpret Swagger resources and attach metadata to request - must be first in swagger-tools middleware chain
+  app.use(middleware.swaggerMetadata());
+
+  // Validate Swagger requests
+  app.use(middleware.swaggerValidator());
+
+  // Route validated requests to appropriate controller
+  app.use(middleware.swaggerRouter(options));
+
+  // Serve the Swagger documents and Swagger UI
+  app.use(middleware.swaggerUi());
 });
 
 // Set up controller

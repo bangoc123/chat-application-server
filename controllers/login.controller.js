@@ -27,7 +27,7 @@ loginController.get('/', (req, res) => {
 
 loginController.post('/', async (req, res) => {
   const { username, password } = req.body;
-  if (!username || !password || !validatePassword) {
+  if (!username || !password || !validatePassword(password)) {
     req.flash('error', errors.BadRequest.message);
   } else {
     try {
