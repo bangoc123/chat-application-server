@@ -7,6 +7,7 @@ import logger from 'winston';
 import flash from 'express-flash';
 import passport from 'passport';
 import swaggerTools from 'swagger-tools';
+import cors from 'cors';
 import { applyPassportStrategy } from './passport';
 import { config } from './global';
 
@@ -73,6 +74,10 @@ const options = {
   swaggerUi: '/swagger.json',
   controllers: './controllers',
 };
+
+// Set up CORS 
+
+app.use(cors());
 
 swaggerTools.initializeMiddleware(swaggerDoc, (middleware) => {
   // Interpret Swagger resources and attach metadata to request - must be first in swagger-tools middleware chain

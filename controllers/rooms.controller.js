@@ -12,24 +12,26 @@ const roomsController = express.Router();
  */
 roomsController.get('/:id', passport.authenticate('jwt', { session: false }), async (req, res) => {
   const roomId = req.params.id;
-  try {
-    const room = await Room.findById(roomId).lean().exec();
-    if (room) {
-      // Find messages sentTo Room
-      const messages = await Message.find({ room: room[underscoreId] }).lean().exec();
-      room.messages = messages;
-      res.status(200).json(room);
-    } else {
-      // FIXME.
-      res.status(404).json(room);
+  const promises = [];
+  const promise1 = Room.findById(roomId).lean().exec();
+  const promise2 = Message.find({ room: roomId }).lean().exec();
+  promises.push(promise1);
+  promises.push(promise2);
+  Promise.all(promises).then((result) => {
+    const room = result[0];
+    const messages = result[1];
+    if (!room) {
+      // FIXME
     }
-  } catch (error) {
+    room.messages = messages;
+    res.status(200).json(room);
+  }).catch((err) => {
+    const { message } = err;
     res.status(500).json({
       code: 500,
-      message: errors.GeneralError.message,
-      error,
+      message,
     });
-  }
+  });
 });
 
 /**
@@ -37,10 +39,10 @@ roomsController.get('/:id', passport.authenticate('jwt', { session: false }), as
  * method: GET
  */
 
-roomsController.get('/', passport.authenticate('jwt', { session: false }), async (req, res) => {
+roomsController.get('/', async (req, res) => {
   const { query } = req;
-  const skip = query.skip || pagingDefault.skip;
-  const limit = query.limit || pagingDefault.limit;
+  const skip = parseInt(query.skip) || pagingDefault.skip;
+  const limit = parseInt(query.limit) || pagingDefault.limit;
   const { userId } = query;
   let queryMongoose = {};
   if (userId) {

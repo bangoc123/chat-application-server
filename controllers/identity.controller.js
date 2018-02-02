@@ -27,7 +27,6 @@ identityController.post('/', [
     try {
       const { username, password } = req.body;
       const user = await User.findOne({ username });
-      console.log('======**++======user', user);
       const isMatchedPassword = user.comparePassword(password);
       if (isMatchedPassword) {
         const token = jwt.sign({ username }, config.passport.secret, {
@@ -36,12 +35,16 @@ identityController.post('/', [
         res.status(200).json({
           token,
         });
+      } else {
+        res.status(401).json({
+          code: 401,
+          message: 'WRONG_PASSWORD',
+        });
       }
     } catch (error) {
-      res.status(500).send({
+      res.status(500).json({
         code: 500,
-        message: errors.GeneralError.message,
-        error,
+        message: error.message,
       });
     }
   }
