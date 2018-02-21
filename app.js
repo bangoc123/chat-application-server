@@ -8,8 +8,12 @@ import flash from 'express-flash';
 import passport from 'passport';
 import swaggerTools from 'swagger-tools';
 import cors from 'cors';
+import socket from 'socket.io';
+import redisClient from './redisClient';
 import { applyPassportStrategy } from './passport';
-import { config } from './global';
+import { config, underscoreId } from './global';
+import SocketManager from './SocketManager';
+import { Message } from './db/models';
 
 import {
   usersController,
@@ -102,10 +106,87 @@ app.use('/login', loginController);
 app.use('/rooms', roomsController);
 app.use('/identity', identityController);
 
+
+// Listen to Redis
+
+redisClient.on('error', (err) => {
+  logger.info('Failed to connect to Redis with ', err);
+});
+
+redisClient.on('connect', () => {
+  logger.info('Redis works successfully.');
+});
+
 const { port, mongoDBUri } = config.env.dev;
-app.listen(port, () => {
-  logger.info(`Stated successfully server at port ${port}`);
+const server = app.listen(port, () => {
+  logger.info(`Started successfully server at port ${port}`);
+
   mongoose.connect(mongoDBUri).then(() => {
     logger.info('Conneted to mongoDB at port 27017');
+  });
+});
+
+// Initialize Socket IO.
+const io = socket(server);
+
+// Need to uncomment after.
+global.io = io;
+// const socketManager = new SocketManager(io); // eslint-disable-line
+
+global.users = {};
+
+
+io.on('connection', (client) => {
+  console.log('Connecting....', client.id);
+
+  client.on('messages-central', (data) => {
+    console.log('Messages in server', data);
+    // Broad cast to all users.
+
+    if (data.TYPE === 'SEND_MESSAGE') {
+      const newMessage = new Message({
+        room: data.SENT_TO,
+        owner: data.OWNER[underscoreId],
+        content: data.currentInput,
+      });
+
+      newMessage.save().then((result) => {
+        console.log('Save successfully', result);
+        const final = result.toObject();
+        final.owner = data.OWNER;
+        io.sockets.in(data.SENT_TO).emit('newMessages', {
+          notice: 'One user just send a message',
+          data: final,
+        });
+      });
+    }
+  });
+
+  client.on('rooms-central', (data) => {
+    if (data.TYPE === 'JOIN_ROOM') {
+      // const roomId = data.ROOM_ID;
+      client.join(data.ROOM_ID, () => {
+        // Boardcast to others not myself
+        // client.broadcast.emit(roomId, 'a new user joined this room');
+        console.log('Current rooms', client.rooms);
+      });
+    }
+    if (data.TYPE === 'LEAVE_ROOM') {
+      // FIXME: implement leave room
+    }
+
+    if (data.TYPE === 'SET_ONLINE') {
+      const { user } = data;
+      user.online = true;
+      console.log('=====user', user);
+
+      io.emit('onlineStatus', {
+        user,
+      });
+    }
+  });
+
+  client.on('disconnect', () => {
+    console.log(client.id, 'disconnected');
   });
 });

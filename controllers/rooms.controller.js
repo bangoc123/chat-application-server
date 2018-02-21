@@ -14,7 +14,10 @@ roomsController.get('/:id', passport.authenticate('jwt', { session: false }), as
   const roomId = req.params.id;
   const promises = [];
   const promise1 = Room.findById(roomId).lean().exec();
-  const promise2 = Message.find({ room: roomId }).lean().exec();
+  const promise2 = Message.find({ room: roomId }).populate({
+    path: 'owner',
+    select: '_id email username avatar',
+  });
   promises.push(promise1);
   promises.push(promise2);
   Promise.all(promises).then((result) => {

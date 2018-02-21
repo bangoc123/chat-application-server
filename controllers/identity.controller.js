@@ -1,8 +1,10 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { check, validationResult } from 'express-validator/check';
-import { errors, config } from './../global';
+import { config, underscoreId } from './../global';
 import { User } from '../db/models';
+import redisClient from '../redisClient';
+import SocketManager from './../SocketManager';
 
 const identityController = express.Router();
 
@@ -29,11 +31,25 @@ identityController.post('/', [
       const user = await User.findOne({ username });
       const isMatchedPassword = user.comparePassword(password);
       if (isMatchedPassword) {
+        // Set online to Redis
+        redisClient.set(`cmc_OnlineStatus_${user[underscoreId]}`, true);
+        // Broadcast online to others except myself
+        // const socketManager = new SocketManager();
+        // // console.log('========socket id', socketManager.client.id);
+        // // console.log(socketManager.client.rooms);
+        // socketManager.io.emit('onlineStatus', {
+        //   user: {
+        //     _id: user[underscoreId],
+        //     online: true,
+        //   },
+        // });
+        // Sign token
         const token = jwt.sign({ username }, config.passport.secret, {
           expiresIn: 10000000000000000000,
         });
         res.status(200).json({
           token,
+          user,
         });
       } else {
         res.status(401).json({
@@ -42,6 +58,7 @@ identityController.post('/', [
         });
       }
     } catch (error) {
+      console.log('=======error', error);
       res.status(500).json({
         code: 500,
         message: error.message,
